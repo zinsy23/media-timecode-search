@@ -17,23 +17,27 @@ def contiguous_search(text, array):
 # regex index: ^[0-9]+$
 def load_srt(source):
     sourceSrt = open(source, "r").read().split("\n")
-    sourceTimecodes = []
-    sourceTexts = []
+    sourceTimeTexts = []
+    currentTimeText = []
     lastTimeIndex = -1
 
-    for i in range(len(sourceSrt)):
+    for i in range(len(sourceSrt) - 1):
         if(re.search("\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}", sourceSrt[i])):
             lastTimeIndex = i
-            sourceTimecodes.append(sourceSrt[i])
+            currentTimeText.append(sourceSrt[i])
         elif(sourceSrt[i] == ''):
-            sourceTexts.append(" ".join(sourceSrt[lastTimeIndex + 1:i]))
+            currentTimeText.append(" ".join(sourceSrt[lastTimeIndex + 1:i]))
+            if(len(currentTimeText) > 1):
+                sourceTimeTexts.append(currentTimeText)
+                currentTimeText = []
 
-        
+    return sourceTimeTexts    
 
-    
-    print(sourceTexts)
+source_srt = load_srt("subtitles/time_travel.srt")
 
-load_srt("subtitles/time_travel.srt")
+print(source_srt[467])
+# for i in range(len(source_srt)):
+#     print(source_srt[i][0])
 
 '''
 text = "awesome there's"
