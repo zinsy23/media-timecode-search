@@ -38,6 +38,8 @@ source_srt = load_srt("subtitles/time_travel.srt")
 for i in range(len(source_srt)):
     print(source_srt[i][0])
 
+print(source_srt[467])
+
 '''
 text = "awesome there's"
 array = ["when I turn off my", "TV it automatically turns off that accessory as well", "that is awesome", "there's good stuff here"]
