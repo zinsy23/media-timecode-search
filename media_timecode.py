@@ -21,3 +21,7 @@ def contiguous_search(text, array):
       break
 
   return start_index, end_index
+
+text = "turn off my TV it automatically"
+array = ["when I turn off my", "TV it automatically turns off that accessory as well"]
+start, end = contiguous_search(text, array)
