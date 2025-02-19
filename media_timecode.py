@@ -34,8 +34,3 @@ def load_srt(source):
     return sourceTimeTexts    
 
 source_srt = load_srt("subtitles/time_travel.srt")
-
-for i in range(len(source_srt)):
-    print(source_srt[i][0])
-
-print(source_srt[467])
