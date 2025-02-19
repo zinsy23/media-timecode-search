@@ -35,9 +35,8 @@ def load_srt(source):
 
 source_srt = load_srt("subtitles/time_travel.srt")
 
-print(source_srt[467])
-# for i in range(len(source_srt)):
-#     print(source_srt[i][0])
+for i in range(len(source_srt)):
+    print(source_srt[i][0])
 
 '''
 text = "awesome there's"
