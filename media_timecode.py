@@ -4,11 +4,14 @@ def contiguous_search(text, array):
     target = text.strip()
     n = len(array)
     
+    # print([row[1] for row in array[0:4]])
+
     for start in range(n):
         for end in range(start, n):
-            segment = " ".join(s.strip() for s in array[start:end+1])
+            segment = " ".join(s.strip() for s in [row[1] for row in array[start:end+1]])
 
             if target in segment:
+                print(segment)
                 return (start, end)
     
     return (-1, -1)
@@ -34,3 +37,5 @@ def load_srt(source):
     return sourceTimeTexts    
 
 source_srt = load_srt("subtitles/time_travel.srt")
+
+print(contiguous_search("escape from this right here but I", source_srt))
