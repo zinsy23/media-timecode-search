@@ -1,19 +1,26 @@
 import re
+import math
 
 def contiguous_search(text, array):
     target = text.strip()
     n = len(array)
+    start = 0
     
     # print([row[1] for row in array[0:4]])
 
-    for start in range(n):
-        for end in range(start, n):
-            segment = " ".join(s.strip() for s in [row[1] for row in array[start:end+1]])
+    for end in range(n):
+        segment = " ".join(s.strip() for s in [row[1] for row in array[start:end+1]])
 
-            if target in segment:
-                return (start, end)
-            else:
-                start = end
+        if target in segment:
+            start = end - 1
+            segment = " ".join(s.strip() for s in [row[1] for row in array[start:end+1]])
+            while (target not in segment):
+                start = start - 1
+                print(start)
+                segment = " ".join(s.strip() for s in [row[1] for row in array[start:end+1]])
+            return (start, end)
+        else:
+            start = max(end - 10, math.ceil(len(text.split()) / 15))
     
     return (-1, -1)
 
