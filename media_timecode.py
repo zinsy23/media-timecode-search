@@ -11,8 +11,9 @@ def contiguous_search(text, array):
             segment = " ".join(s.strip() for s in [row[1] for row in array[start:end+1]])
 
             if target in segment:
-                print(segment)
                 return (start, end)
+            else:
+                start = end
     
     return (-1, -1)
 
@@ -35,7 +36,3 @@ def load_srt(source):
                 currentTimeText = []
 
     return sourceTimeTexts    
-
-source_srt = load_srt("subtitles/time_travel.srt")
-
-print(contiguous_search("escape from this right here but I", source_srt))
