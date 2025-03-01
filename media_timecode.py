@@ -1,5 +1,18 @@
 import re
 import math
+from difflib import SequenceMatcher
+
+# Creates an array of fuzzy search scores throughout the source
+def score_fuzzy_indexes(text, array):
+    fuzzyScores = []
+
+    # Score each index of array against the text for similarity between 0 an 1
+    for i in range(len(array)):
+        matcher = SequenceMatcher(None, text, array[i][1])
+        fuzzyScores.append(matcher.ratio())
+
+    return fuzzyScores
+
 
 # Searches blocks of subtitle text
 def contiguous_search(text, array):
@@ -50,3 +63,16 @@ def load_srt(source):
                 currentTimeText = []
 
     return sourceTimeTexts    
+
+# Gets the index of the largest stored fuzzy of a fuzzy scores array
+def getLargest(array):
+    # Initialize the largest array and index for standard largest item algorithm
+    largest = array[0]
+    largestIndex = 0
+
+    for i in range(len(array)):
+        if array[i] > largest:
+            largest = array[i]
+            largestIndex = i
+
+    return largestIndex
