@@ -64,7 +64,7 @@ def score_fuzzy_indexes(text, array):
     return fuzzyScores
 
 # Gets the index of the largest stored fuzzy of a fuzzy scores array
-def getLargest(array):
+def get_largest(array):
     # Initialize the largest array and index for standard largest item algorithm
     largest = array[0]
     largestIndex = 0
