@@ -61,7 +61,7 @@ def score_fuzzy_indexes(text, array):
         matcher = SequenceMatcher(None, text, array[i][1])
         fuzzyScores.append(matcher.ratio())
 
-    return fuzzyScores
+    return fuzzyScores, len(text.split()) # TODO: turn back into single return when destination subtitle is implemented
 
 # Gets the index of the largest stored fuzzy of a fuzzy scores array
 def get_largest(array):
@@ -75,3 +75,28 @@ def get_largest(array):
             largestIndex = i
 
     return largestIndex
+
+# Gets the starting time of the referenced moment
+def get_starting_time(fuzzies, textLength):
+    largestIndex = get_largest(fuzzies)
+
+    start = end = largestIndex
+
+    estimatedNumSnippets = math.ceil(textLength / 15)
+    margin = 0.10
+
+    for i in range(estimatedNumSnippets):
+        if(largestIndex + i + 1 <= len(fuzzies)):
+            if(fuzzies[largestIndex + i + 1] > fuzzies[largestIndex] - 12):
+                end += 1
+            else:
+                break
+
+    for i in range(estimatedNumSnippets):
+        if(largestIndex - i - 1 >= len(fuzzies)):
+            if(fuzzies[largestIndex - i - 1] > fuzzies[largestIndex] - 12):
+                start -= 1
+            else:
+                break
+
+    return start #TODO: verify reliability
