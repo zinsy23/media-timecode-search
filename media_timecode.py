@@ -50,7 +50,7 @@ def load_srt(source):
                 sourceTimeTexts.append(currentTimeText)
                 currentTimeText = []
 
-    return sourceTimeTexts    
+    return sourceTimeTexts
 
 # Creates an array of fuzzy search scores throughout the source
 def score_fuzzy_indexes(text, array):
@@ -100,3 +100,33 @@ def get_starting_time(fuzzies, textLength):
                 break
 
     return start #TODO: verify reliability
+
+# Gets the corresponding timecode of the desination source
+# destinationTime format: HH:MM:SS
+# We're matching a timecode like: 00:10:33,159 --> 00:10:35,559
+def corresponding_timecode_finder(destinationTime):
+    sourceSrt = load_srt("subtitles/time_travel.srt")
+    destinationSrt = load_srt("subtitles/time_travel.srt")
+
+    destinationTimeCompare = datetime.strptime(destinationTime, "%H:%M:%S").time()
+
+    startCompare = 0
+    endCompare = len(destinationSrt)
+    index = math.floor(endCompare / 2)
+
+    while True:
+        destinationSearch = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[index][0]).group()
+        destinationSrtCompare = datetime.strptime(destinationSearch, "%H:%M:%S").time()
+
+        print(destinationSrtCompare)
+        if(endCompare - startCompare < 2):
+            index = startCompare
+            break
+        elif(destinationTimeCompare > destinationSrtCompare):
+            startCompare = index
+            index += math.floor((endCompare - startCompare) / 2)
+        elif(destinationTimeCompare < destinationSrtCompare):
+            endCompare = index
+            index -= math.floor((endCompare - startCompare) / 2)
+
+    return destinationSrt[index] #TODO: Make it return actual starting point
