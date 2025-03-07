@@ -1,6 +1,7 @@
 import re
 import math
 from difflib import SequenceMatcher
+from datetime import datetime
 
 # Searches blocks of subtitle text
 def contiguous_search(text, array):
