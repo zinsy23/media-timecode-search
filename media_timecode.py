@@ -109,25 +109,36 @@ def corresponding_timecode_finder(destinationTime):
     sourceSrt = load_srt("subtitles/time_travel.srt")
     destinationSrt = load_srt("subtitles/time_travel.srt")
 
+    # Convert the destinationTime variable into a format friendly with comparing timecodes
     destinationTimeCompare = datetime.strptime(destinationTime, "%H:%M:%S").time()
 
+    # Initialize our comparison tracking variables
     startCompare = 0
     endCompare = len(destinationSrt)
-    index = math.floor(endCompare / 2)
+    index = -1
 
-    while True:
-        destinationSearch = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[index][0]).group()
-        destinationSrtCompare = datetime.strptime(destinationSearch, "%H:%M:%S").time()
-
-        print(destinationSrtCompare)
-        if(endCompare - startCompare < 2):
-            index = startCompare
+    # Check if the timecode we're finding exists to determine if rounding is needed. If so, we don't need to round our time
+    for i in range(len(destinationSrt)):
+        if(destinationTime in destinationSrt[i][0][0:14]):
+            index = i
             break
-        elif(destinationTimeCompare > destinationSrtCompare):
-            startCompare = index
-            index += math.floor((endCompare - startCompare) / 2)
-        elif(destinationTimeCompare < destinationSrtCompare):
-            endCompare = index
-            index -= math.floor((endCompare - startCompare) / 2)
 
-    return destinationSrt[index] #TODO: Make it return actual starting point
+    # If we do need to round our time down, do so
+    if index == -1:
+        index = math.floor(endCompare / 2)
+        while True:
+            destinationSearch = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[index][0]).group()
+            destinationSrtCompare = datetime.strptime(destinationSearch, "%H:%M:%S").time()
+
+            # Perform a binary search to quickly find the time in O(log n)
+            if(endCompare - startCompare < 2):
+                index = startCompare
+                break
+            elif(destinationTimeCompare > destinationSrtCompare):
+                startCompare = index
+                index += math.floor((endCompare - startCompare) / 2)
+            elif(destinationTimeCompare <= destinationSrtCompare):
+                endCompare = index
+                index -= math.floor((endCompare - startCompare) / 2)
+
+    return destinationSrt[index] #TODO: Make it return actual starting point when we compare actual SRTs
