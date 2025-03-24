@@ -102,13 +102,7 @@ def get_starting_time(fuzzies, textLength):
 
     return start #TODO: verify reliability
 
-# Gets the corresponding timecode of the desination source
-# destinationTime format: HH:MM:SS
-# We're matching a timecode like: 00:10:33,159 --> 00:10:35,559
-def corresponding_timecode_finder(destinationTime):
-    sourceSrt = load_srt("subtitles/Time Travel GPT Edited.srt")
-    destinationSrt = load_srt("subtitles/Time Travel GPT Live.srt")
-
+def get_timecode_index(destinationTime, sourceSrt):
     # Convert the destinationTime variable into a format friendly with comparing timecodes
     destinationTimeCompare = datetime.strptime(destinationTime, "%H:%M:%S").time()
 
@@ -132,12 +126,16 @@ def corresponding_timecode_finder(destinationTime):
         # If exact match not found, use the closest time
         index = left if left < len(sourceSrt) else right
 
-    # Get the text from sourceSrt around our index to use as search context
+    return index
+    
+def match_timecode(index, sourceSrt, destinationSrt):
+    # Initialize variables
     searchRadius = 2
     searchText = ""
     startIdx = max(0, index - searchRadius)
     endIdx = min(len(sourceSrt) - 1, index + searchRadius)
     
+    # Get the text from sourceSrt around our index to use as search context
     for i in range(startIdx, endIdx + 1):
         searchText += sourceSrt[i][1] + " "
     searchText = searchText.strip()
@@ -169,10 +167,21 @@ def corresponding_timecode_finder(destinationTime):
                 bestMatchIndex = i
         
         searchWindow *= 2
+    
+    return (bestMatchIndex, bestMatchScore)
+
+# Gets the corresponding timecode of the desination source
+# destinationTime format: HH:MM:SS
+# We're matching a timecode like: 00:10:33,159 --> 00:10:35,559
+def corresponding_timecode_finder(destinationTime):
+    sourceSrt = load_srt("subtitles/Time Travel GPT Edited.srt")
+    destinationSrt = load_srt("subtitles/Time Travel GPT Live.srt")
+
+    index = get_timecode_index(destinationTime, sourceSrt)
+
+    bestMatchIndex, bestMatchScore = match_timecode(index, sourceSrt, destinationSrt)
 
     if bestMatchScore < 0.5:  # 50% minimum similarity threshold
         raise ValueError(f"Could not find reliable match between source and destination subtitles. Best match score: {bestMatchScore:.2%}")
 
     return destinationSrt[bestMatchIndex]
-
-print(corresponding_timecode_finder("06:37:39"))
