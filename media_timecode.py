@@ -108,8 +108,10 @@ def corresponding_timecode_finder(destinationTime):
     bestMatchIndex, bestMatchScore = match_timecode(index, sourceSrt, destinationSrt)
 
     if bestMatchScore < 0.5:  # 50% minimum similarity threshold
-        raise ValueError(f"Could not find reliable match between source and destination subtitles. Best match score: {bestMatchScore:.2%}")
+        return None
 
-    return destinationSrt[bestMatchIndex]
+    timecode = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[bestMatchIndex][0]).group()
+
+    return timecode
 
 print(corresponding_timecode_finder(argv[1]))
