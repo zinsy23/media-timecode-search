@@ -106,39 +106,73 @@ def get_starting_time(fuzzies, textLength):
 # destinationTime format: HH:MM:SS
 # We're matching a timecode like: 00:10:33,159 --> 00:10:35,559
 def corresponding_timecode_finder(destinationTime):
-    sourceSrt = load_srt("subtitles/time_travel.srt")
-    destinationSrt = load_srt("subtitles/time_travel.srt")
+    sourceSrt = load_srt("subtitles/Time Travel GPT Edited.srt")
+    destinationSrt = load_srt("subtitles/Time Travel GPT Live.srt")
 
     # Convert the destinationTime variable into a format friendly with comparing timecodes
     destinationTimeCompare = datetime.strptime(destinationTime, "%H:%M:%S").time()
 
-    # Initialize our comparison tracking variables
-    startCompare = 0
-    endCompare = len(destinationSrt)
-    index = -1
-
-    # Check if the timecode we're finding exists to determine if rounding is needed. If so, we don't need to round our time
-    for i in range(len(destinationSrt)):
-        if(destinationTime in destinationSrt[i][0][0:14]):
-            index = i
+    # Binary search to find closest matching time
+    left = 0
+    right = len(sourceSrt) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        current_time = re.search("^\d{2}:\d{2}:\d{2}", sourceSrt[mid][0]).group()
+        current_time = datetime.strptime(current_time, "%H:%M:%S").time()
+        
+        if current_time == destinationTimeCompare:
+            index = mid
             break
+        elif current_time < destinationTimeCompare:
+            left = mid + 1
+        else:
+            right = mid - 1
+    else:
+        # If exact match not found, use the closest time
+        index = left if left < len(sourceSrt) else right
 
-    # If we do need to round our time down, do so
-    if index == -1:
-        index = math.floor(endCompare / 2)
-        while True:
-            destinationSearch = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[index][0]).group()
-            destinationSrtCompare = datetime.strptime(destinationSearch, "%H:%M:%S").time()
+    # Get the text from sourceSrt around our index to use as search context
+    searchRadius = 2
+    searchText = ""
+    startIdx = max(0, index - searchRadius)
+    endIdx = min(len(sourceSrt) - 1, index + searchRadius)
+    
+    for i in range(startIdx, endIdx + 1):
+        searchText += sourceSrt[i][1] + " "
+    searchText = searchText.strip()
 
-            # Perform a binary search to quickly find the time in O(log n)
-            if(endCompare - startCompare < 2):
-                index = startCompare
-                break
-            elif(destinationTimeCompare > destinationSrtCompare):
-                startCompare = index
-                index += math.floor((endCompare - startCompare) / 2)
-            elif(destinationTimeCompare <= destinationSrtCompare):
-                endCompare = index
-                index -= math.floor((endCompare - startCompare) / 2)
+    # Search through destinationSrt with expanding window until good match found
+    bestMatchScore = 0
+    bestMatchIndex = -1
+    searchWindow = max(20, abs(index - len(destinationSrt) // 2))  # Start with larger window if times are far apart
+    
+    while bestMatchScore < 0.8 and searchWindow <= len(destinationSrt):  # 80% similarity threshold
+        windowStart = max(0, index - searchWindow//2)
+        windowEnd = min(len(destinationSrt) - 1, index + searchWindow//2)
+        
+        for i in range(windowStart, windowEnd + 1):
+            compareText = ""
+            compareStart = max(0, i - searchRadius)
+            compareEnd = min(len(destinationSrt) - 1, i + searchRadius)
+            
+            for j in range(compareStart, compareEnd + 1):
+                compareText += destinationSrt[j][1] + " "
+            compareText = compareText.strip()
+            
+            # Use SequenceMatcher for similarity comparison
+            matcher = SequenceMatcher(None, searchText.lower(), compareText.lower())
+            score = matcher.ratio()
+            
+            if score > bestMatchScore:
+                bestMatchScore = score
+                bestMatchIndex = i
+        
+        searchWindow *= 2
 
-    return destinationSrt[index] #TODO: Make it return actual starting point when we compare actual SRTs
+    if bestMatchScore < 0.5:  # 50% minimum similarity threshold
+        raise ValueError(f"Could not find reliable match between source and destination subtitles. Best match score: {bestMatchScore:.2%}")
+
+    return destinationSrt[bestMatchIndex]
+
+print(corresponding_timecode_finder("06:37:39"))
