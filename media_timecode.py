@@ -2,6 +2,7 @@ import re
 import math
 from difflib import SequenceMatcher
 from datetime import datetime
+from sys import argv
 
 # Loads an SRT file into a data structure friendly for the rest of the program
 def load_srt(source):
@@ -110,3 +111,5 @@ def corresponding_timecode_finder(destinationTime):
         raise ValueError(f"Could not find reliable match between source and destination subtitles. Best match score: {bestMatchScore:.2%}")
 
     return destinationSrt[bestMatchIndex]
+
+print(corresponding_timecode_finder(argv[1]))
