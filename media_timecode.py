@@ -12,16 +12,18 @@ VERSION_PAIRS = [
     ("before", "after")
 ]
 
+# Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
-    """Get command line argument at index or return default if not provided"""
     try:
         return argv[index]
     except IndexError:
         return default
 
-def detect_available_versions(basename):
-    """Detect available versions for a given basename by checking subtitle files"""
-    available_versions = set()
+# Detects the pair names of subtitles available for a given basename
+def detect_subtitle_versions(basename):
+    available_versions = set() # Use a set to avoid duplicates
+
+    # Parse out the pair names from the subtitle files if they exist
     try:
         files = os.listdir("subtitles")
         for file in files:
@@ -33,14 +35,13 @@ def detect_available_versions(basename):
     except OSError:
         return []
     
-    return list(available_versions)
+    return list(available_versions) # Convert set to list
 
+# Determine source and destination versions based on available files and specified destination
 def determine_source_destination(basename, specified_destination=None):
-    """
-    Determine source and destination versions based on available files and specified destination
-    Returns: (source_version, destination_version)
-    """
-    versions = detect_available_versions(basename)
+    versions = detect_subtitle_versions(basename)
+
+    # Detect if subtitles are invalid
     if not versions:
         raise ValueError(f"No subtitle versions found for basename: {basename}")
     
@@ -48,7 +49,7 @@ def determine_source_destination(basename, specified_destination=None):
     if len(versions) == 1:
         return versions[0], versions[0]
     
-    # Try to match versions against known pairs
+    # Determine the source and destination pairs and determine source and destination classifications
     for source, dest in VERSION_PAIRS:
         if source in versions and dest in versions:
             if specified_destination:
@@ -81,6 +82,7 @@ def load_srt(source):
     currentTimeText = []
     lastTimeIndex = -1
 
+    # Add SRT timecode and text entries to a 2D array
     for i in range(len(sourceSrt) - 1):
         if(re.search("\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}", sourceSrt[i])):
             # Add timecode text entry to array
@@ -97,6 +99,7 @@ def load_srt(source):
 
     return sourceTimeTexts
 
+# Matches input timecode to actual timecode in source SRT file, rounding down to the nearest second
 def get_timecode_index(destinationTime, sourceSrt):
     # Convert the destinationTime variable into a format friendly with comparing timecodes
     destinationTimeCompare = datetime.strptime(destinationTime, "%H:%M:%S").time()
@@ -123,6 +126,7 @@ def get_timecode_index(destinationTime, sourceSrt):
 
     return index
     
+# Matches the timecode to the best matching text in the corresponding destination SRT file
 def match_timecode(index, sourceSrt, destinationSrt):
     # Initialize variables
     searchRadius = 2
@@ -163,11 +167,11 @@ def match_timecode(index, sourceSrt, destinationSrt):
         
         searchWindow *= 2
     
-    return (bestMatchIndex, bestMatchScore)
+    return (bestMatchIndex, bestMatchScore) # Return the best match index and score
 
 # Gets the corresponding timecode of the desination source
 # destinationTime format: HH:MM:SS
-# We're matching a timecode like: 00:10:33,159 --> 00:10:35,559
+# We're matching a timecode like: 00:10:33,159 --> 00:10:35,559 from let's say 00:10:34 input
 def corresponding_timecode_finder(baseName, destinationTime, sourceDestination=""):
     # Determine source and destination versions
     try:
@@ -184,12 +188,17 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
         print(f"Error: Could not load subtitle files - {e}")
         return None
 
+    # Get the index of the user inputted timecode in the source SRT file
     index = get_timecode_index(destinationTime, sourceSrt)
+
+    # Match the timecode to the best matching text in the corresponding destination SRT file
     bestMatchIndex, bestMatchScore = match_timecode(index, sourceSrt, destinationSrt)
 
+    # If we don't have a good match, return None
     if bestMatchScore < 0.5:  # 50% minimum similarity threshold
         return None
 
+    # Get the timecode from the best matching text in the destination SRT file
     timecode = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[bestMatchIndex][0]).group()
     return timecode
 
