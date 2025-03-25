@@ -8,8 +8,12 @@ from sys import argv
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
     ("edited", "live"),
+    ("edit", "live"),
+    ("edited", "livestream"),
+    ("edit", "livestream"),
     ("source", "destination"),
-    ("before", "after")
+    ("before", "after"),
+    ("original", "edited")
 ]
 
 # Get command line argument at index or return default if not provided
