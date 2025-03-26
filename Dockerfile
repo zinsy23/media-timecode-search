@@ -10,6 +10,6 @@ WORKDIR /home/python/media-timecode-search
 
 COPY --chown=python:python requirements.txt ./
 
-RUN pip install -r requirements.txt
-
 COPY --chown=python:python . .
+
+CMD ["/bin/sh"]
