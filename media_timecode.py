@@ -205,13 +205,41 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
     timecode = re.search(r"^\d{2}:\d{2}:\d{2}", destinationSrt[bestMatchIndex][0]).group()
     return timecode
 
+# Convert any supported time format (HH:MM:SS, MM:SS, SS) to HH:MM:SS format
+def normalize_time_format(time_str):
+    try:
+        # HH:MM:SS format (now accepts 1 or 2 digits for hours)
+        if re.match(r'^\d{1,2}:\d{2}:\d{2}$', time_str):
+            hours, minutes, seconds = map(int, time_str.split(':'))
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        # MM:SS format
+        elif re.match(r'^\d{1,2}:\d{2}$', time_str):
+            minutes, seconds = map(int, time_str.split(':'))
+            hours, minutes = divmod(minutes, 60)  # Handle case where minutes > 59
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        # SS format
+        elif re.match(r'^\d+$', time_str):
+            total_seconds = int(time_str)
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        else:
+            raise ValueError("Invalid time format")
+    except ValueError:
+        raise ValueError(f"Invalid time format: {time_str}. Please use HH:MM:SS, MM:SS, or SS format.")
+
 if __name__ == "__main__":
     if len(argv) < 3:
         print("Usage: python media_timecode.py <basename> <time> [destination_version]")
+        print("Time formats supported: HH:MM:SS, MM:SS, or SS")
         exit(1)
         
     basename = argv[1]
-    time = argv[2]
+    try:
+        time = normalize_time_format(argv[2])
+    except ValueError as e:
+        print(f"Error: {e}")
+        exit(1)
     destination = get_arg_or_default(3, "")
     
     result = corresponding_timecode_finder(basename, time, destination)
