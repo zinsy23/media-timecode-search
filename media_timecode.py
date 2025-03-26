@@ -87,7 +87,7 @@ def load_srt(source):
 
     # Add SRT timecode and text entries to a 2D array
     for i in range(len(sourceSrt) - 1):
-        if(re.search("\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}", sourceSrt[i])):
+        if(re.search(r"\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}", sourceSrt[i])):
             # Add timecode text entry to array
             lastTimeIndex = i
             currentTimeText.append(sourceSrt[i])
@@ -113,7 +113,7 @@ def get_timecode_index(destinationTime, sourceSrt):
     
     while left <= right:
         mid = (left + right) // 2
-        current_time = re.search("^\d{2}:\d{2}:\d{2}", sourceSrt[mid][0]).group()
+        current_time = re.search(r"^\d{2}:\d{2}:\d{2}", sourceSrt[mid][0]).group()
         current_time = datetime.strptime(current_time, "%H:%M:%S").time()
         
         if current_time == destinationTimeCompare:
@@ -202,7 +202,7 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
         return None
 
     # Get the timecode from the best matching text in the destination SRT file
-    timecode = re.search("^\d{2}:\d{2}:\d{2}", destinationSrt[bestMatchIndex][0]).group()
+    timecode = re.search(r"^\d{2}:\d{2}:\d{2}", destinationSrt[bestMatchIndex][0]).group()
     return timecode
 
 if __name__ == "__main__":
