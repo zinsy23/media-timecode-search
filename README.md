@@ -4,7 +4,7 @@ This project is designed to reference transcript files between two versions of m
 
 ## Usage
 
-1. Add the two corresponding transcripts in the "subtitles" directory.
+1. Add the two corresponding transcripts in the "subtitles" directory. Name them using the following format convention: media_basename sourcetype (e.g. time_travel_audio edited.srt)
 2. Run the script and provide it the media name, based on the base name of the subtitles. (python find_timecode.py [subtitle_basename] [time] ?[source|dest]`)
 
 Example:
