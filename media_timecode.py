@@ -3,6 +3,10 @@ import os
 from difflib import SequenceMatcher
 from datetime import datetime
 from sys import argv
+from flask import Flask, request, jsonify
+
+# Initialize Flask backend server
+app = Flask(__name__)
 
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
@@ -14,6 +18,14 @@ VERSION_PAIRS = [
     ("before", "after"),
     ("original", "edited")
 ]
+
+# Define the route for the timecode API
+@app.route('/timecode', methods=['GET'])
+def get_timecode():
+    basename = request.args.get('basename')
+    time = request.args.get('time')
+    destination = request.args.get('destination')
+    return jsonify(corresponding_timecode_finder(basename, time, destination))
 
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
