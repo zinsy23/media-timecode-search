@@ -7,28 +7,30 @@ function getBasename() {
 // Find destination button logic
 async function findDestination() {
     // Get the source, destination, and timecode from the input fields
+    console.log("findDestination");
     const source = document.getElementById('source').value;
-    const destination = document.getElementById('destination').value;
     const basename = getBasename();
 
     // Send the request to the server
-    const url = `http://localhost:5000/timecode?basename=${basename}&time=${time}&destination=${destination}`;
+    const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination="destination"`;
     const response = await fetch(url);
     const data = await response.json();
+    console.log(data);
     document.getElementById('destination').value = data.timecode;
 }
 
 // Find source button logic
 async function findSource() {
     // Get the source, destination, and timecode from the input fields
-    const source = document.getElementById('source').value;
+    console.log("findDestination");
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
 
     // Send the request to the server
-    const url = `http://localhost:5000/timecode?basename=${basename}&time=${time}&destination=${source}`;
+    const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination="source"`;
     const response = await fetch(url);
     const data = await response.json();
+    console.log(data);
     document.getElementById('source').value = data.timecode;
 }
 

@@ -241,21 +241,20 @@ def normalize_time_format(time_str):
         raise ValueError(f"Invalid time format: {time_str}. Please use HH:MM:SS, MM:SS, or SS format.")
 
 if __name__ == "__main__":
-    if len(argv) < 3:
-        print("Usage: python media_timecode.py <basename> <time> [destination_version]")
-        print("Time formats supported: HH:MM:SS, MM:SS, or SS")
-        exit(1)
-        
-    basename = argv[1]
-    try:
-        time = normalize_time_format(argv[2])
-    except ValueError as e:
-        print(f"Error: {e}")
-        exit(1)
-    destination = get_arg_or_default(3, "")
-    
-    result = corresponding_timecode_finder(basename, time, destination)
-    if result:
-        print(result)
+    if len(argv) < 2:
+        app.run()  # Run the Flask server if no arguments are provided
     else:
-        print("No matching timecode found")
+        basename = argv[1]
+        try:
+            time = normalize_time_format(argv[2])
+        except ValueError as e:
+            print(f"Error: {e}")
+            exit(1)
+        destination = get_arg_or_default(3, "")
+        
+        # Run CLI with provided arguments
+        result = corresponding_timecode_finder(basename, time, destination)
+        if result:
+            print(result)
+        else:
+            print("No matching timecode found")
