@@ -6,8 +6,12 @@ const path = require('path');
 const app = express();
 const PORT = 8000;
 
-// Serve static files from the current directory
 app.use(express.static(__dirname));
+
+// Serve static files from the current directory
+app.get('*', (req, res) => {
+    console.log(req.url);
+});
 
 // Start the server
 app.listen(PORT, () => {
