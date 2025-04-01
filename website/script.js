@@ -30,7 +30,7 @@ async function findDestination() {
     console.log("findDestination");
     const source = document.getElementById('source').value;
     const basename = getBasename();
-    const destinationType = await getDestinationType();
+    const destinationType = getDestinationType();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
@@ -38,7 +38,7 @@ async function findDestination() {
     const response = await fetch(url);
     const data = await response.json();
     console.log("Received response:", data);
-    document.getElementById('destination').value = data;
+    document.getElementById('destination').value = (data == null) ? "Not found" : data;
 }
 
 // Find source button logic
@@ -47,7 +47,7 @@ async function findSource() {
     console.log("findSource");
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
-    const sourceType = await getSourceType();
+    const sourceType = getSourceType();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
@@ -55,6 +55,6 @@ async function findSource() {
     const response = await fetch(url);
     const data = await response.json();
     console.log("Received response:", data);
-    document.getElementById('source').value = data;
+    document.getElementById('source').value = (data == null) ? "Not found" : data;
 }
 
