@@ -27,6 +27,8 @@ async function getDestinationType() {
 // Find destination button logic
 async function findDestination() {
     // Get the source, destination, and timecode from the input fields
+    document.getElementById('destination').value = "";
+    document.getElementById('destination').placeholder = "Searching...";
     console.log("findDestination");
     const source = document.getElementById('source').value;
     const basename = getBasename();
@@ -39,11 +41,14 @@ async function findDestination() {
     const data = await response.json();
     console.log("Received response:", data);
     document.getElementById('destination').value = (data == null) ? "Not found" : data;
+    document.getElementById('destination').placeholder = "Destination";
 }
 
 // Find source button logic
 async function findSource() {
     // Get the source, destination, and timecode from the input fields
+    document.getElementById('source').value = "";
+    document.getElementById('source').placeholder = "Searching...";
     console.log("findSource");
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
@@ -56,5 +61,6 @@ async function findSource() {
     const data = await response.json();
     console.log("Received response:", data);
     document.getElementById('source').value = (data == null) ? "Not found" : data;
+    document.getElementById('source').placeholder = "Source";
 }
 
