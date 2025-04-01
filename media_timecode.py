@@ -28,6 +28,13 @@ def get_timecode():
     time = request.args.get('time')
     destination = request.args.get('destination')
 
+    # Check if required parameters are present
+    if not all([basename, time, destination]):
+        return jsonify({
+            "error": "Missing required parameters",
+            "required": ["basename", "time", "destination"]
+        }), 400
+
     print(f"basename: {basename}, time: {time}, destination: {destination}")
 
     return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
