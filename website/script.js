@@ -32,7 +32,7 @@ async function findDestination() {
     console.log("findDestination");
     const source = document.getElementById('source').value;
     const basename = getBasename();
-    const destinationType = getDestinationType();
+    const destinationType = await getDestinationType();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
@@ -52,7 +52,7 @@ async function findSource() {
     console.log("findSource");
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
-    const sourceType = getSourceType();
+    const sourceType = await getSourceType();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
