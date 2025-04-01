@@ -12,25 +12,27 @@ async function findDestination() {
     const basename = getBasename();
 
     // Send the request to the server
-    const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination="destination"`;
+    const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination=live`;
+    console.log("Making request to:", url);
     const response = await fetch(url);
     const data = await response.json();
-    console.log(data);
-    document.getElementById('destination').value = data.timecode;
+    console.log("Received response:", data);
+    document.getElementById('destination').value = data;
 }
 
 // Find source button logic
 async function findSource() {
     // Get the source, destination, and timecode from the input fields
-    console.log("findDestination");
+    console.log("findSource");
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
 
     // Send the request to the server
-    const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination="source"`;
+    const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination=edited`;
+    console.log("Making request to:", url);
     const response = await fetch(url);
     const data = await response.json();
-    console.log(data);
-    document.getElementById('source').value = data.timecode;
+    console.log("Received response:", data);
+    document.getElementById('source').value = data;
 }
 

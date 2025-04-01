@@ -4,9 +4,11 @@ from difflib import SequenceMatcher
 from datetime import datetime
 from sys import argv
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Initialize Flask backend server
 app = Flask(__name__)
+CORS(app)
 
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
@@ -25,7 +27,10 @@ def get_timecode():
     basename = request.args.get('basename')
     time = request.args.get('time')
     destination = request.args.get('destination')
-    return jsonify(corresponding_timecode_finder(basename, time, destination))
+
+    print(f"basename: {basename}, time: {time}, destination: {destination}")
+
+    return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
 
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
