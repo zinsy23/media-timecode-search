@@ -39,6 +39,23 @@ def get_timecode():
 
     return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
 
+# API to return the source type of the subtitle file
+@app.route('/source', methods=['GET'])
+def get_source_type():
+    basename = request.args.get('basename')
+
+    sourceType = detect_subtitle_versions(basename)[0]
+
+    return jsonify(sourceType)
+
+@app.route('/destination', methods=['GET'])
+def get_destination_type():
+    basename = request.args.get('basename')
+
+    destinationType = detect_subtitle_versions(basename)[-1]
+
+    return jsonify(destinationType)
+
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
     try:
