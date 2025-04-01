@@ -6,11 +6,17 @@ const path = require('path');
 const app = express();
 const PORT = 8000;
 
+// Serve static files from the current directory
 app.use(express.static(__dirname));
 
-// Serve static files from the current directory
+// Catch-all route to serve index.html for any unmatched routes
 app.get('*', (req, res) => {
-    console.log(req.url);
+    // Get the basename from the URL path (remove leading slash)
+    const basename = req.url.substring(1);
+    console.log(basename);
+
+    // Serve the index.html file
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start the server
