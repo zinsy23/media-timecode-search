@@ -1,7 +1,7 @@
 // Import required modules
 const express = require('express');
 const path = require('path');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // Used for loading the website based on whether a valid resource exists
 
 // Define express and port
 const app = express();
@@ -9,13 +9,13 @@ const PORT = 8000;
 
 // Handle root path first
 app.get('/', (req, res) => {
-    // Set headers to prevent caching
+    // Set headers to prevent caching (remove once full testing is done)
     res.set({
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'
     });
-    res.sendFile(path.join(__dirname, 'error.html'));
+    res.sendFile(path.join(__dirname, 'error.html')); // Send error page if no resource is specified
 });
 
 // Handle all other paths
@@ -25,19 +25,17 @@ app.get('*', async (req, res, next) => {
     
     // Skip checking for static files
     if (basename.includes('.')) {
-        return next();  // Pass to next middleware (static file handler)
+        return next();  // Used to serve static files even if error page is displayed initially
     }
 
     try {
         // Check if the resource exists by calling the source API
         const response = await fetch(`http://localhost:5000/source?basename=${basename}`);
         
-        // Check if the response is ok (status in the range 200-299)
+        // Don't proceed if no resource exists
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`); // Jump to catch block if no resource exists
         }
-        
-        const data = await response.json();
         
         // If we get here, the resource exists
         res.sendFile(path.join(__dirname, 'index.html'));

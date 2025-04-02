@@ -1,6 +1,8 @@
+// Global variables to store the source and destination pairs to minimize API calls
 let sourceType = "";
 let destinationType = "";
 
+// Update the source and destination pairs globally when the page loads
 window.onload = updateTypes;
 
 // Get basename from URL path
@@ -9,11 +11,13 @@ function getBasename() {
     return window.location.pathname.substring(1) || '';
 }
 
+// Convert a string to title case
 function toTitleCase(str) {
     if (!str) return '';  // Handle empty string case
     return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
+// Update the source and destination pairs globally
 async function updateTypes() {
     const basename = getBasename();
     
@@ -32,6 +36,7 @@ async function updateTypes() {
     destinationType = await getDestinationType();
     const formattedBasename = toTitleCase(basename.replace(/_/g, ' '));
 
+    // Update the website header and placeholders
     document.getElementById('main-header').innerHTML = `
         Find the corresponding timecode between the ${sourceType} and ${destinationType} versions of ${formattedBasename}:`;
     document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
@@ -40,60 +45,56 @@ async function updateTypes() {
     document.getElementById('destination-button').innerHTML = "Find " + sourceType;
 }
 
-// Get source type
+// Get source pair type
 async function getSourceType() {
     const basename = getBasename();
     const url = `http://localhost:5000/source?basename=${basename}`;
     const response = await fetch(url);
     const data = await response.json();
-    console.log("Received response for source:", data);
     return data;
 }
 
-// Get destination type
+// Get destination pair type
 async function getDestinationType() {
     const basename = getBasename();
     const url = `http://localhost:5000/destination?basename=${basename}`;
     const response = await fetch(url);
     const data = await response.json();
-    console.log("Received response for destination:", data);
     return data;
 }
 
 // Find destination button logic
 async function findDestination() {
-    // Get the source, destination, and timecode from the input fields
+    // Clear the destination input field and placeholder
     document.getElementById('destination').value = "";
     document.getElementById('destination').placeholder = "Searching...";
-    console.log("findDestination");
+
+    // Get the source and basename from the input fields
     const source = document.getElementById('source').value;
     const basename = getBasename();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
-    console.log("Making request to:", url);
     const response = await fetch(url);
     const data = await response.json();
-    console.log("Received response:", data);
     document.getElementById('destination').value = (data == null) ? "Not found" : data;
     document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
 }
 
 // Find source button logic
 async function findSource() {
-    // Get the source, destination, and timecode from the input fields
+    // Clear the source input field and placeholder
     document.getElementById('source').value = "";
     document.getElementById('source').placeholder = "Searching...";
-    console.log("findSource");
+
+    // Get the destination and basename from the input fields
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
-    console.log("Making request to:", url);
     const response = await fetch(url);
     const data = await response.json();
-    console.log("Received response:", data);
     document.getElementById('source').value = (data == null) ? "Not found" : data;
     document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
 }

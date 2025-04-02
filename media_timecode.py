@@ -35,31 +35,32 @@ def get_timecode():
             "required": ["basename", "time", "destination"]
         }), 400
 
-    print(f"basename: {basename}, time: {time}, destination: {destination}")
-
     return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
 
 # API to return the source type of the subtitle file
 @app.route('/source', methods=['GET'])
 def get_source_type():
     basename = request.args.get('basename')
-    versions = detect_subtitle_versions(basename)
+    versions = detect_subtitle_versions(basename) # Get source and destination pairs for website
     
+    # Mechanism to detect if no valid subtitle files are found
     if not versions:
         return jsonify({"error": "No valid resource found"}), 404
         
-    sourceType = versions[0]
+    sourceType = versions[0] # Get source pair type
     return jsonify(sourceType)
 
+# API to return the destination type of the subtitle file
 @app.route('/destination', methods=['GET'])
 def get_destination_type():
     basename = request.args.get('basename')
-    versions = detect_subtitle_versions(basename)
+    versions = detect_subtitle_versions(basename) # Get source and destination pairs for website
     
+    # Mechanism to detect if no valid subtitle files are found
     if not versions:
         return jsonify({"error": "No valid resource found"}), 404
         
-    destinationType = versions[-1]
+    destinationType = versions[-1] # Get destination pair type
     return jsonify(destinationType)
 
 # Get command line argument at index or return default if not provided
