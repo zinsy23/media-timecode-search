@@ -1,7 +1,30 @@
+let sourceType = "";
+let destinationType = "";
+
+window.onload = updateTypes;
+
 // Get basename from URL path
 function getBasename() {
     // Get everything after the first slash, or empty string if no slash
     return window.location.pathname.substring(1) || '';
+}
+
+function toTitleCase(str) {
+    return str.replace(/\b\w/g, char => char.toUpperCase());
+}
+
+async function updateTypes() {
+    // The .replace() is a manual way to achieve title case
+    sourceType = await getSourceType();
+    destinationType = await getDestinationType();
+    const basename = toTitleCase(getBasename().replace(/_/g, ' '));
+
+    document.getElementById('main-header').innerHTML = `
+        Find the corresponding timecode between the ${sourceType} and ${destinationType} versions of ${basename}:`;
+    document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
+    document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
+    document.getElementById('source-button').innerHTML = "Find " + destinationType;
+    document.getElementById('destination-button').innerHTML = "Find " + sourceType;
 }
 
 // Get source type
@@ -32,7 +55,6 @@ async function findDestination() {
     console.log("findDestination");
     const source = document.getElementById('source').value;
     const basename = getBasename();
-    const destinationType = await getDestinationType();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
@@ -41,7 +63,7 @@ async function findDestination() {
     const data = await response.json();
     console.log("Received response:", data);
     document.getElementById('destination').value = (data == null) ? "Not found" : data;
-    document.getElementById('destination').placeholder = "Destination";
+    document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
 }
 
 // Find source button logic
@@ -52,7 +74,6 @@ async function findSource() {
     console.log("findSource");
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
-    const sourceType = await getSourceType();
 
     // Send the request to the server
     const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
@@ -61,6 +82,6 @@ async function findSource() {
     const data = await response.json();
     console.log("Received response:", data);
     document.getElementById('source').value = (data == null) ? "Not found" : data;
-    document.getElementById('source').placeholder = "Source";
+    document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
 }
 
