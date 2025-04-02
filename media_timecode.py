@@ -43,17 +43,23 @@ def get_timecode():
 @app.route('/source', methods=['GET'])
 def get_source_type():
     basename = request.args.get('basename')
-
-    sourceType = detect_subtitle_versions(basename)[0]
-
+    versions = detect_subtitle_versions(basename)
+    
+    if not versions:
+        return jsonify({"error": "No valid resource found"}), 404
+        
+    sourceType = versions[0]
     return jsonify(sourceType)
 
 @app.route('/destination', methods=['GET'])
 def get_destination_type():
     basename = request.args.get('basename')
-
-    destinationType = detect_subtitle_versions(basename)[-1]
-
+    versions = detect_subtitle_versions(basename)
+    
+    if not versions:
+        return jsonify({"error": "No valid resource found"}), 404
+        
+    destinationType = versions[-1]
     return jsonify(destinationType)
 
 # Get command line argument at index or return default if not provided
@@ -71,7 +77,8 @@ def detect_subtitle_versions(basename):
     try:
         files = os.listdir("subtitles")
         for file in files:
-            if file.startswith(basename):
+            # Only match files that start with the exact basename followed by a space
+            if file.startswith(basename + " "):
                 # Extract the version part (everything between basename and .srt)
                 version = file[len(basename):].strip().replace(".srt", "").strip()
                 if version:  # Only add non-empty versions
