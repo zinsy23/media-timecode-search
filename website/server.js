@@ -23,6 +23,12 @@ app.get('*', async (req, res) => {
     try {
         // Check if the resource exists by calling the source API
         const response = await fetch(`http://localhost:5000/source?basename=${basename}`);
+        
+        // Check if the response is ok (status in the range 200-299)
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         // If we get here, the resource exists
