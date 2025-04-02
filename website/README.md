@@ -1,6 +1,6 @@
-# Subtitle Timecode Finder Site
+# Media Timecode Finder Site
 
-Frontend website for the Subtitle Timecode Finder.
+Frontend website for the Media Timecode Finder.
 
 ## How to run
 
