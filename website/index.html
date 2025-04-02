@@ -8,11 +8,11 @@
         <h1 id="main-header">Find the corresponding timecode between two sources:</h1>
         <div class="input-container">
             <div class="input-group">
-                <input type="text" id="source" placeholder="Source timecode">
+                <input type="text" id="source" onkeydown="if (event.key === 'Enter') findDestination()" placeholder="Source timecode">
                 <button id="source-button" onclick="findDestination()">Find destination</button>
             </div>
             <div class="input-group">
-                <input type="text" id="destination" placeholder="Destination timecode">
+                <input type="text" id="destination" onkeydown="if (event.key === 'Enter') findSource()" placeholder="Destination timecode">
                 <button id="destination-button" onclick="findSource()">Find source</button>
             </div>
         </div>
