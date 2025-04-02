@@ -1,11 +1,18 @@
 .input-container {
     display: flex;
     gap: 60px;
+    justify-content: center;
+}
+
+#main-header {
+    text-align: center;
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .input-group input {

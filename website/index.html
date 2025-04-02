@@ -5,7 +5,9 @@
         <link rel="stylesheet" type="text/css" href="styles.css">
     </head>
     <body>
-        <h1 id="main-header">Find the corresponding timecode between two sources:</h1>
+        <div class="main-header">
+            <h1 id="main-header">Find the corresponding timecode between two sources:</h1>
+        </div>
         <div class="input-container">
             <div class="input-group">
                 <input type="text" id="source" tabindex = "1"autofocus onkeydown="if (event.key === 'Enter') {findDestination(); this.select();}" placeholder="Source timecode">
