@@ -10,17 +10,30 @@ function getBasename() {
 }
 
 function toTitleCase(str) {
+    if (!str) return '';  // Handle empty string case
     return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
 async function updateTypes() {
+    const basename = getBasename();
+    
+    // If we're on the root path, don't try to get types
+    if (!basename) {
+        document.getElementById('main-header').innerHTML = 'Find the corresponding timecode between media versions:';
+        document.getElementById('source').placeholder = "Source timecode";
+        document.getElementById('destination').placeholder = "Destination timecode";
+        document.getElementById('source-button').innerHTML = "Find Destination";
+        document.getElementById('destination-button').innerHTML = "Find Source";
+        return;
+    }
+
     // The .replace() is a manual way to achieve title case
     sourceType = await getSourceType();
     destinationType = await getDestinationType();
-    const basename = toTitleCase(getBasename().replace(/_/g, ' '));
+    const formattedBasename = toTitleCase(basename.replace(/_/g, ' '));
 
     document.getElementById('main-header').innerHTML = `
-        Find the corresponding timecode between the ${sourceType} and ${destinationType} versions of ${basename}:`;
+        Find the corresponding timecode between the ${sourceType} and ${destinationType} versions of ${formattedBasename}:`;
     document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
     document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
     document.getElementById('source-button').innerHTML = "Find " + destinationType;

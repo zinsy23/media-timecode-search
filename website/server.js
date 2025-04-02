@@ -7,17 +7,25 @@ const fetch = require('node-fetch');
 const app = express();
 const PORT = 8000;
 
-// Serve static files first
-app.use(express.static(__dirname));
+// Handle root path first
+app.get('/', (req, res) => {
+    // Set headers to prevent caching
+    res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+    res.sendFile(path.join(__dirname, 'error.html'));
+});
 
-// Serve static files from the current directory
-app.get('*', async (req, res) => {
+// Handle all other paths
+app.get('*', async (req, res, next) => {
     // Get the basename from the URL path (remove leading slash)
     const basename = req.url.substring(1);
     
     // Skip checking for static files
     if (basename.includes('.')) {
-        return;
+        return next();  // Pass to next middleware (static file handler)
     }
 
     try {
@@ -39,6 +47,9 @@ app.get('*', async (req, res) => {
         res.sendFile(path.join(__dirname, 'error.html'));
     }
 });
+
+// Serve static files last
+app.use(express.static(__dirname));
 
 // Start the server
 app.listen(PORT, () => {
