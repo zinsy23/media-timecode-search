@@ -8,12 +8,12 @@
         <h1 id="main-header">Find the corresponding timecode between two sources:</h1>
         <div class="input-container">
             <div class="input-group">
-                <input type="text" id="source" onkeydown="if (event.key === 'Enter') findDestination()" placeholder="Source timecode">
-                <button id="source-button" onclick="findDestination()">Find destination</button>
+                <input type="text" id="source" tabindex = "1"autofocus onkeydown="if (event.key === 'Enter') {findDestination(); this.select();}" placeholder="Source timecode">
+                <button id="source-button" tabindex="3" onclick="findDestination(); document.getElementById('source').select();">Find destination</button>
             </div>
             <div class="input-group">
-                <input type="text" id="destination" onkeydown="if (event.key === 'Enter') findSource()" placeholder="Destination timecode">
-                <button id="destination-button" onclick="findSource()">Find source</button>
+                <input type="text" id="destination" tabindex = "2" onkeydown="if (event.key === 'Enter') {findSource(); this.select();}" placeholder="Destination timecode">
+                <button id="destination-button" tabindex="4" onclick="findSource(); document.getElementById('destination').select();">Find source</button>
             </div>
         </div>
         <script src="script.js"></script>
