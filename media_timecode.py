@@ -98,7 +98,7 @@ def open_cloud(filename):
 # Loads an SRT file into a data structure friendly for the rest of the program
 def load_srt(source):
     # Read the input SRT and set up data structure friendly for all needed operations
-    sourceSrt = open(source, "r").read().split("\n")
+    sourceSrt = open_cloud(source)
     sourceTimeTexts = []
     currentTimeText = []
     lastTimeIndex = -1
@@ -203,8 +203,8 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
         
     # Load the appropriate SRT files
     try:
-        sourceSrt = load_srt(f"subtitles/{baseName} {source_version}.srt")
-        destinationSrt = load_srt(f"subtitles/{baseName} {dest_version}.srt")
+        sourceSrt = load_srt(f"{baseName} {source_version}.srt")
+        destinationSrt = load_srt(f"{baseName} {dest_version}.srt")
     except FileNotFoundError as e:
         print(f"Error: Could not load subtitle files - {e}")
         return None
