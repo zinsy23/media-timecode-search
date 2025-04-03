@@ -9,12 +9,14 @@ const PORT = 8000;
 
 // Handle root path first
 app.get('/', (req, res) => {
-    // Set headers to prevent caching (remove once full testing is done)
+    // Disable caching (comment res.set to enable caching)
+    /*
     res.set({
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'
     });
+    */
     res.sendFile(path.join(__dirname, 'error.html')); // Send error page if no resource is specified
 });
 
@@ -25,7 +27,15 @@ app.get('*', async (req, res, next) => {
     
     // Skip checking for static files
     if (basename.includes('.')) {
-        return next();  // Used to serve static files even if error page is displayed initially
+        // Disable caching (comment res.set to enable caching)
+        /*
+        res.set({
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
+        */
+        return next();  // Pass to next middleware (static file handler)
     }
 
     try {
