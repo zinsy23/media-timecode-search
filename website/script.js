@@ -2,6 +2,11 @@
 let sourceType = "";
 let destinationType = "";
 
+// Configure the API base URL - needs to be actual IP address if not accessing page locally
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000'
+    : `http://${window.location.hostname}:5000`;  // Use same hostname as webpage but port 5000
+
 // Update the source and destination pairs globally when the page loads
 window.onload = updateTypes;
 
@@ -48,7 +53,7 @@ async function updateTypes() {
 // Get source pair type
 async function getSourceType() {
     const basename = getBasename();
-    const url = `http://localhost:5000/source?basename=${basename}`;
+    const url = `${API_BASE_URL}/source?basename=${basename}`;
     const response = await fetch(url);
     const data = await response.json();
     return data;
@@ -57,7 +62,7 @@ async function getSourceType() {
 // Get destination pair type
 async function getDestinationType() {
     const basename = getBasename();
-    const url = `http://localhost:5000/destination?basename=${basename}`;
+    const url = `${API_BASE_URL}/destination?basename=${basename}`;
     const response = await fetch(url);
     const data = await response.json();
     return data;
@@ -74,7 +79,7 @@ async function findDestination() {
     const basename = getBasename();
 
     // Send the request to the server
-    const url = `http://localhost:5000/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
+    const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
     const response = await fetch(url);
     const data = await response.json();
     document.getElementById('destination').value = (data == null) ? "Not found" : data;
@@ -92,7 +97,7 @@ async function findSource() {
     const basename = getBasename();
 
     // Send the request to the server
-    const url = `http://localhost:5000/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
+    const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
     const response = await fetch(url);
     const data = await response.json();
     document.getElementById('source').value = (data == null) ? "Not found" : data;

@@ -279,7 +279,7 @@ def normalize_time_format(time_str):
 
 if __name__ == "__main__":
     if len(argv) < 2:
-        app.run()  # Run the Flask server if no arguments are provided
+        app.run(host='0.0.0.0', port=5000)  # Run the Flask server if no arguments are provided
     else:
         basename = argv[1]
         try:
