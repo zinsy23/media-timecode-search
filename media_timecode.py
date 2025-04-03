@@ -3,6 +3,7 @@ import os
 from difflib import SequenceMatcher
 from datetime import datetime
 from sys import argv
+import boto3
 
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
@@ -14,6 +15,13 @@ VERSION_PAIRS = [
     ("before", "after"),
     ("original", "edited")
 ]
+
+# Define the cloud resource
+CLOUD_RESOURCE = boto3.resource('s3',
+        endpoint_url=os.getenv("CF_URL"),
+        aws_access_key_id=os.getenv("CF_ACCESS"),
+        aws_secret_access_key=os.getenv("CF_SECRET")
+)
 
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
@@ -76,6 +84,16 @@ def determine_source_destination(basename, specified_destination=None):
             raise ValueError(f"Specified destination '{specified_destination}' not found in available versions: {versions}")
     
     return source, dest
+
+# Opens a subtitle file locally
+def open_local(filename):
+    return open(f"subtitles/{filename}", "r").read().split("\n")
+
+# Opens a subtitle file from the cloud bucket
+def open_cloud(filename):
+    subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
+
+    return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
 
 # Loads an SRT file into a data structure friendly for the rest of the program
 def load_srt(source):
