@@ -24,6 +24,9 @@ CLOUD_RESOURCE = boto3.resource('s3',
         aws_secret_access_key=os.getenv("CF_SECRET")
 )
 
+# Define whether to load media source from cloud or local
+SOURCE_TYPE = "cloud" 
+
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
     try:
@@ -86,20 +89,20 @@ def determine_source_destination(basename, specified_destination=None):
     
     return source, dest
 
-# Opens a subtitle file locally
-def open_local(filename):
-    return open(f"subtitles/{filename}", "r").read().split("\n")
-
 # Opens a subtitle file from the cloud bucket
-def open_cloud(filename):
-    subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
-
-    return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
+def open_subtitles(filename):
+    if SOURCE_TYPE == "cloud":
+        subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
+        return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
+    elif SOURCE_TYPE == "local":
+        return open(f"subtitles/{filename}", "r").read().split("\n")
+    else:
+        raise ValueError(f"Invalid source type: {SOURCE_TYPE}")
 
 # Loads an SRT file into a data structure friendly for the rest of the program
 def load_srt(source):
     # Read the input SRT and set up data structure friendly for all needed operations
-    sourceSrt = open_cloud(source)
+    sourceSrt = open_subtitles(source)
     sourceTimeTexts = []
     currentTimeText = []
     lastTimeIndex = -1
