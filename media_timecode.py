@@ -41,7 +41,7 @@ def detect_subtitle_versions(basename):
     # Parse out the pair names from the subtitle files if they exist
     try:
         match SOURCE_TYPE:
-            case "local":
+            case "local": # Detection for local subtitles
                 files = os.listdir("subtitles")
                 for file in files:
                     if file.startswith(basename):
@@ -49,7 +49,7 @@ def detect_subtitle_versions(basename):
                         version = file[len(basename):].strip().replace(".srt", "").strip()
                         if version:  # Only add non-empty versions
                             available_versions.add(version)
-            case "cloud":
+            case "cloud": # Detection for cloud subtitles
                 subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
                 for obj in subtitlesBucket.objects.all():
                     if obj.key.startswith(basename):
@@ -57,7 +57,6 @@ def detect_subtitle_versions(basename):
                         version = obj.key[len(basename):].strip().replace(".srt", "").strip()
                         if version:  # Only add non-empty versions
                             available_versions.add(version)
-
     except OSError:
         return []
     
@@ -102,10 +101,10 @@ def determine_source_destination(basename, specified_destination=None):
 
 # Opens a subtitle file from the cloud bucket
 def open_subtitles(filename):
-    if SOURCE_TYPE == "cloud":
+    if SOURCE_TYPE == "cloud": # Open subtitles from cloud bucket
         subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
         return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
-    elif SOURCE_TYPE == "local":
+    elif SOURCE_TYPE == "local": # Open subtitles from local directory
         return open(f"subtitles/{filename}", "r").read().split("\n")
     else:
         raise ValueError(f"Invalid source type: {SOURCE_TYPE}")
@@ -220,10 +219,10 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
     try:
         sourceSrt = load_srt(f"{baseName} {source_version}.srt")
         destinationSrt = load_srt(f"{baseName} {dest_version}.srt")
-    except FileNotFoundError as e:
+    except FileNotFoundError as e: # Error handling for local subtitles
         print(f"Error: Could not load subtitle files - {e}")
         return None
-    except botocore.exceptions.ClientError as e:
+    except botocore.exceptions.ClientError as e: # Error handling for cloud subtitles
         print(f"Error: Could not load subtitle files - {e}")
         return None
 
