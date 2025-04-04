@@ -4,6 +4,7 @@ from difflib import SequenceMatcher
 from datetime import datetime
 from sys import argv
 import boto3
+import botocore
 
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
@@ -206,6 +207,9 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
         sourceSrt = load_srt(f"{baseName} {source_version}.srt")
         destinationSrt = load_srt(f"{baseName} {dest_version}.srt")
     except FileNotFoundError as e:
+        print(f"Error: Could not load subtitle files - {e}")
+        return None
+    except botocore.exceptions.ClientError as e:
         print(f"Error: Could not load subtitle files - {e}")
         return None
 
