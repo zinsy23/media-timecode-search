@@ -40,13 +40,24 @@ def detect_subtitle_versions(basename):
 
     # Parse out the pair names from the subtitle files if they exist
     try:
-        files = os.listdir("subtitles")
-        for file in files:
-            if file.startswith(basename):
-                # Extract the version part (everything between basename and .srt)
-                version = file[len(basename):].strip().replace(".srt", "").strip()
-                if version:  # Only add non-empty versions
-                    available_versions.add(version)
+        match SOURCE_TYPE:
+            case "local":
+                files = os.listdir("subtitles")
+                for file in files:
+                    if file.startswith(basename):
+                        # Extract the version part (everything between basename and .srt)
+                        version = file[len(basename):].strip().replace(".srt", "").strip()
+                        if version:  # Only add non-empty versions
+                            available_versions.add(version)
+            case "cloud":
+                subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
+                for obj in subtitlesBucket.objects.all():
+                    if obj.key.startswith(basename):
+                        # Extract the version part (everything between basename and .srt)
+                        version = obj.key[len(basename):].strip().replace(".srt", "").strip()
+                        if version:  # Only add non-empty versions
+                            available_versions.add(version)
+
     except OSError:
         return []
     
