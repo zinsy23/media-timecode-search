@@ -15,4 +15,4 @@ COPY --chown=node:node *.html .
 
 EXPOSE 8000
 
-CMD [ "/bin/sh" ]
+CMD [ "node", "server.js" ]
