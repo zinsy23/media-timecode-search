@@ -9,7 +9,7 @@ This project is designed to reference transcript files between two versions of m
 pip install -r requirements.txt
 ```
 
-2. If you're referencing the subtitles locally, create a new directory for the subtitles in the same directory as the script. If you're referencing the subtitles from the cloud, see the [Connecting to the Cloud](#connecting-to-the-cloud-the-way-i-do-it) section.
+2. If you're referencing the subtitles locally, create a new directory for the subtitles in the same directory as the script. If you're referencing the subtitles from the cloud, see the [Connecting to the Cloud](#connecting-to-the-cloud-my-process) section.
 
 3. Add the two corresponding transcripts in the "subtitles" location. Name them using the following format convention: `media_basename sourcetype` (e.g. `time_travel_audio edited.srt`)
 
@@ -66,7 +66,7 @@ To run it interactively in PowerShell, referencing the subtitles locally, run th
 docker run -it --mount "type=bind,source=${PWD}\subtitles,target=/home/python/media-timecode-search/subtitles" media-timecode-search
 ```
 
-To run it interactively in PowerShell, referencing the subtitles from the cloud using Doppler, set up a service token in Doppler. Set up the cloud if not done so already, referencing the [Connecting to the Cloud](#connecting-to-the-cloud-the-way-i-do-it) section. Add it to the `dev` config in Doppler (if using in local development), preferably called `DOPPLER_TOKEN`.
+To run it interactively in PowerShell, referencing the subtitles from the cloud using Doppler, set up a service token in Doppler. Set up the cloud if not done so already, referencing the [Connecting to the Cloud](#connecting-to-the-cloud-my-process) section. Add it to the `dev` config in Doppler (if using in local development), preferably called `DOPPLER_TOKEN`. Ensure Doppler CLI is pointing to the dev config when running. Set it via `doppler setup` and follow the prompts.
 
 Then, run the following commands:
 ```sh
