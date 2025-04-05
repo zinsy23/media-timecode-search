@@ -25,7 +25,7 @@ CLOUD_RESOURCE = boto3.resource('s3',
 )
 
 # Define whether to load media source from cloud or local
-SOURCE_TYPE = "cloud" 
+SOURCE_TYPE = "local" 
 
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
