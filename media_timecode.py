@@ -3,12 +3,21 @@ import os
 from difflib import SequenceMatcher
 from datetime import datetime
 from sys import argv
+import boto3
+import botocore
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # Initialize Flask backend server
 app = Flask(__name__)
 CORS(app)
+
+# Define the cloud resource
+CLOUD_RESOURCE = boto3.resource('s3',
+        endpoint_url=os.getenv("CF_URL"),
+        aws_access_key_id=os.getenv("CF_ACCESS"),
+        aws_secret_access_key=os.getenv("CF_SECRET")
+)
 
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
@@ -20,6 +29,9 @@ VERSION_PAIRS = [
     ("before", "after"),
     ("original", "edited")
 ]
+
+# Define whether to load media source from cloud or local
+SOURCE_TYPE = "local" 
 
 # Define the route for the timecode API
 @app.route('/timecode', methods=['GET'])
@@ -76,14 +88,24 @@ def detect_subtitle_versions(basename):
 
     # Parse out the pair names from the subtitle files if they exist
     try:
-        files = os.listdir("subtitles")
-        for file in files:
-            # Only match files that start with the exact basename followed by a space
-            if file.startswith(basename + " "):
-                # Extract the version part (everything between basename and .srt)
-                version = file[len(basename):].strip().replace(".srt", "").strip()
-                if version:  # Only add non-empty versions
-                    available_versions.add(version)
+        match SOURCE_TYPE:
+            case "local": # Detection for local subtitles
+                files = os.listdir("subtitles")
+                for file in files:
+                    if file.startswith(basename):
+                        # Extract the version part (everything between basename and .srt)
+                        version = file[len(basename):].strip().replace(".srt", "").strip()
+                        if version:  # Only add non-empty versions
+                            available_versions.add(version)
+            case "cloud": # Detection for cloud subtitles
+                subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
+                for obj in subtitlesBucket.objects.all():
+                    if obj.key.startswith(basename):
+                        # Extract the version part (everything between basename and .srt)
+                        version = obj.key[len(basename):].strip().replace(".srt", "").strip()
+                        if version:  # Only add non-empty versions
+                            available_versions.add(version)
+
     except OSError:
         return []
     
@@ -126,10 +148,20 @@ def determine_source_destination(basename, specified_destination=None):
     
     return source, dest
 
+# Opens a subtitle file from the cloud bucket
+def open_subtitles(filename):
+    if SOURCE_TYPE == "cloud": # Open subtitles from cloud bucket
+        subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
+        return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
+    elif SOURCE_TYPE == "local": # Open subtitles from local directory
+        return open(f"subtitles/{filename}", "r").read().split("\n")
+    else:
+        raise ValueError(f"Invalid source type: {SOURCE_TYPE}")
+
 # Loads an SRT file into a data structure friendly for the rest of the program
 def load_srt(source):
     # Read the input SRT and set up data structure friendly for all needed operations
-    sourceSrt = open(source, "r").read().split("\n")
+    sourceSrt = open_subtitles(source)
     sourceTimeTexts = []
     currentTimeText = []
     lastTimeIndex = -1
@@ -234,9 +266,12 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
         
     # Load the appropriate SRT files
     try:
-        sourceSrt = load_srt(f"subtitles/{baseName} {source_version}.srt")
-        destinationSrt = load_srt(f"subtitles/{baseName} {dest_version}.srt")
-    except FileNotFoundError as e:
+        sourceSrt = load_srt(f"{baseName} {source_version}.srt")
+        destinationSrt = load_srt(f"{baseName} {dest_version}.srt")
+    except FileNotFoundError as e: # Error handling for local subtitles
+        print(f"Error: Could not load subtitle files - {e}")
+        return None
+    except botocore.exceptions.ClientError as e: # Error handling for cloud subtitles
         print(f"Error: Could not load subtitle files - {e}")
         return None
 
