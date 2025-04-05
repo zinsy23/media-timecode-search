@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Subtitle Timecode Finder</title>
+        <title>Media Timecode Finder</title>
         <link rel="stylesheet" type="text/css" href="styles.css">
     </head>
     <body>
-        <h1>Find the corresponding timecode between two sources:</h1>
+        <div class="main-header">
+            <h1 id="main-header">Find the corresponding timecode between two sources:</h1>
+        </div>
         <div class="input-container">
             <div class="input-group">
-                <input type="text" id="source" placeholder="Source">
-                <button id="source-button">Find Destination</button>
+                <input type="text" id="destination" tabindex="1" autofocus onkeydown="if (event.key === 'Enter') {findSource(); this.select();}" placeholder="Source timecode">
+                <button id="destination-button" tabindex="3" onclick="findSource(); document.getElementById('destination').select();">Find source</button>
             </div>
             <div class="input-group">
-                <input type="text" id="destination" placeholder="Destination">
-                <button id="destination-button">Find Source</button>
+                <input type="text" id="source" tabindex="2" onkeydown="if (event.key === 'Enter') {findDestination(); this.select();}" placeholder="Destination timecode">
+                <button id="source-button" tabindex="4" onclick="findDestination(); document.getElementById('source').select();">Find destination</button>
             </div>
         </div>
+        <script src="script.js"></script>
     </body>
 </html>
