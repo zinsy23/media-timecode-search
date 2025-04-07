@@ -5,7 +5,7 @@ let destinationType = "";
 // Configure the API base URL - needs to be actual IP address if not accessing page locally
 const API_BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000'
-    : `http://${window.location.hostname}:5000`;  // Use same hostname as webpage but port 5000
+    : 'http://media-timecode:5000';  // Use Docker service name when in container
 
 // Update the source and destination pairs globally when the page loads
 window.onload = updateTypes;

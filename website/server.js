@@ -7,6 +7,9 @@ const fetch = require('node-fetch'); // Used for loading the website based on wh
 const app = express();
 const PORT = 8000;
 
+// Define API URL using service name from docker-compose
+const API_URL = process.env.API_URL || 'http://media-timecode:5000';
+
 // Handle root path first
 app.get('/', (req, res) => {
     // Disable caching (comment res.set to enable caching)

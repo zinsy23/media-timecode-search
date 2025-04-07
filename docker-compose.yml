@@ -20,6 +20,9 @@ services:
     image: media-timecode-website
     ports:
       - "8000:8000"
-      - "5000"
     networks:
+      - media-timecode
+    environment:
+      - API_URL=http://media-timecode:5000
+    depends_on:
       - media-timecode

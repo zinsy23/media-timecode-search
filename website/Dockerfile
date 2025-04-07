@@ -14,5 +14,6 @@ COPY --chown=node:node *.js .
 COPY --chown=node:node *.html .
 
 EXPOSE 8000
+EXPOSE 5000
 
 CMD [ "node", "server.js" ]
