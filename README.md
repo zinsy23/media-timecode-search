@@ -64,9 +64,17 @@ In this case, if edited weren't provided in the above command, the script would 
 
 4. If you're referencing the subtitles from the cloud, you can set the `SOURCE_TYPE` variable to `cloud` in the `media_timecode.py` file. Connect to the cloud, referencing the [Connecting to the Cloud](#connecting-to-the-cloud-my-process) section.
 
-5. Once everything is set up, run `docker compose up -d` to install and start the containers.
+5. Once everything is set up, run the following command to install and start the containers:
+```sh
+docker compose up -d
+```
 
 6. You can then access the website at `http://localhost:8000`.
+
+7. To turn it off, run the following command:
+```sh
+docker compose down
+```
 
 ## If using Docker without Docker Compose:
 
