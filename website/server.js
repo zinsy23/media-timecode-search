@@ -12,7 +12,9 @@ const PORT = 8000;
 app.use(cors());
 
 // Define API URL using service name from docker-compose
-const API_URL = process.env.API_URL || 'http://media-timecode:5000';
+const API_URL = process.env.API_URL || (process.env.NODE_ENV === 'production' 
+    ? 'http://media-timecode:5000'  // Docker environment
+    : 'http://localhost:5000');     // Local environment
 
 // Handle root path first
 app.get('/', (req, res) => {
