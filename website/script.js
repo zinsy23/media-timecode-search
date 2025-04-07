@@ -5,7 +5,7 @@ let destinationType = "";
 // Configure the API base URL - needs to be actual IP address if not accessing page locally
 const API_BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000'
-    : 'http://media-timecode:5000';  // Use Docker service name when in container
+    : window.location.protocol + '//' + window.location.hostname + ':5000';  // Use the same hostname as the website
 
 // Update the source and destination pairs globally when the page loads
 window.onload = updateTypes;
@@ -36,36 +36,58 @@ async function updateTypes() {
         return;
     }
 
-    // The .replace() is a manual way to achieve title case
-    sourceType = await getSourceType();
-    destinationType = await getDestinationType();
-    const formattedBasename = toTitleCase(basename.replace(/_/g, ' '));
+    try {
+        // The .replace() is a manual way to achieve title case
+        sourceType = await getSourceType();
+        destinationType = await getDestinationType();
+        const formattedBasename = toTitleCase(basename.replace(/_/g, ' '));
 
-    // Update the website header and placeholders
-    document.getElementById('main-header').innerHTML = `
-        Find the corresponding timecode between the ${sourceType} and ${destinationType} versions of ${formattedBasename}:`;
-    document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
-    document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
-    document.getElementById('source-button').innerHTML = "Find " + destinationType;
-    document.getElementById('destination-button').innerHTML = "Find " + sourceType;
+        // Update the website header and placeholders
+        document.getElementById('main-header').innerHTML = `
+            Find the corresponding timecode between the ${sourceType} and ${destinationType} versions of ${formattedBasename}:`;
+        document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
+        document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
+        document.getElementById('source-button').innerHTML = "Find " + destinationType;
+        document.getElementById('destination-button').innerHTML = "Find " + sourceType;
+    } catch (error) {
+        console.error('Error updating types:', error);
+        // Handle the error gracefully
+        document.getElementById('main-header').innerHTML = 'Error loading resource information';
+    }
 }
 
 // Get source pair type
 async function getSourceType() {
     const basename = getBasename();
     const url = `${API_BASE_URL}/source?basename=${basename}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error in getSourceType:', error);
+        throw error;
+    }
 }
 
 // Get destination pair type
 async function getDestinationType() {
     const basename = getBasename();
     const url = `${API_BASE_URL}/destination?basename=${basename}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error in getDestinationType:', error);
+        throw error;
+    }
 }
 
 // Find destination button logic
@@ -78,12 +100,21 @@ async function findDestination() {
     const source = document.getElementById('source').value;
     const basename = getBasename();
 
-    // Send the request to the server
-    const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    document.getElementById('destination').value = (data == null) ? "Not found" : data;
-    document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
+    try {
+        // Send the request to the server
+        const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        document.getElementById('destination').value = (data == null) ? "Not found" : data;
+        document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
+    } catch (error) {
+        console.error('Error in findDestination:', error);
+        document.getElementById('destination').value = "Error";
+        document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
+    }
 }
 
 // Find source button logic
@@ -96,11 +127,20 @@ async function findSource() {
     const destination = document.getElementById('destination').value;
     const basename = getBasename();
 
-    // Send the request to the server
-    const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    document.getElementById('source').value = (data == null) ? "Not found" : data;
-    document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
+    try {
+        // Send the request to the server
+        const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        document.getElementById('source').value = (data == null) ? "Not found" : data;
+        document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
+    } catch (error) {
+        console.error('Error in findSource:', error);
+        document.getElementById('source').value = "Error";
+        document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
+    }
 }
 

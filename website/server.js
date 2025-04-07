@@ -2,10 +2,14 @@
 const express = require('express');
 const path = require('path');
 const fetch = require('node-fetch'); // Used for loading the website based on whether a valid resource exists
+const cors = require('cors');
 
 // Define express and port
 const app = express();
 const PORT = 8000;
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Define API URL using service name from docker-compose
 const API_URL = process.env.API_URL || 'http://media-timecode:5000';
