@@ -56,6 +56,8 @@ In this case, if edited weren't provided in the above command, the script would 
 
 1. If you don't already have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed on your machine, install it.
 
+**Note**: If you're having issues with Docker Desktop on Windows due to WSL related issues, I recommend fully uninstalling and reinstalling using the Hyper-V option instead of WSL. It's likely not worth screwing around with.
+
 2. Create a `.env` file in the project directory and add the `DOPPLER_TOKEN` variable. See the [Connecting to the Cloud](#connecting-to-the-cloud-my-process) section for more information on setting up Doppler and getting the token. You can rename the `.env.example` file to `.env` and add your token to it. Ensure the token never gets shared as it needs to be defined in the `.env` file in plain text.
 
 3. If you're referencing the subtitles locally instead of on the cloud, you can set the `SOURCE_TYPE` variable to `local` in the `media_timecode.py` file. There should already be a bind mount for the subtitles directory in the `docker-compose.yml` file. Create the subtitles directory in the project directory if it doesn't already exist. See the [Setup](#setup) section for more information on the subtitle file naming convention.
