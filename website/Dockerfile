@@ -12,6 +12,7 @@ RUN npm i
 
 COPY --chown=node:node *.js .
 COPY --chown=node:node *.html .
+COPY --chown=node:node *.css .
 
 EXPOSE 8000
 EXPOSE 5000
