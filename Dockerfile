@@ -21,4 +21,6 @@ COPY --chown=python:python media_timecode.py .
 
 RUN chmod +x docker_startup.sh
 
-CMD ["/bin/sh", "-c", "./docker_startup.sh && exec /bin/sh"]
+EXPOSE 5000
+
+CMD ["/bin/sh", "-c", "./docker_startup.sh && doppler run -- python media_timecode.py"]

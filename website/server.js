@@ -40,7 +40,7 @@ app.get('*', async (req, res, next) => {
 
     try {
         // Check if the resource exists by calling the source API
-        const response = await fetch(`http://localhost:5000/source?basename=${basename}`);
+        const response = await fetch(`${API_URL}/source?basename=${basename}`);
         
         // Don't proceed if no resource exists
         if (!response.ok) {

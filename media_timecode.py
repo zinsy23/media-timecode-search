@@ -31,7 +31,7 @@ VERSION_PAIRS = [
 ]
 
 # Define whether to load media source from cloud or local
-SOURCE_TYPE = "local" 
+SOURCE_TYPE = "cloud" 
 
 # Define the route for the timecode API
 @app.route('/timecode', methods=['GET'])
