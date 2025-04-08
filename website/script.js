@@ -104,15 +104,17 @@ async function findDestination() {
         // Send the request to the server
         const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${source}&destination=${destinationType}`;
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
         const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+        
         document.getElementById('destination').value = (data == null) ? "Not found" : data;
         document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
     } catch (error) {
         console.error('Error in findDestination:', error);
-        document.getElementById('destination').value = "Error";
+        document.getElementById('destination').value = "Error: " + error.message;
         document.getElementById('destination').placeholder = toTitleCase(destinationType) + " timecode";
     }
 }
@@ -131,15 +133,17 @@ async function findSource() {
         // Send the request to the server
         const url = `${API_BASE_URL}/timecode?basename=${basename}&time=${destination}&destination=${sourceType}`;
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
         const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+        
         document.getElementById('source').value = (data == null) ? "Not found" : data;
         document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
     } catch (error) {
         console.error('Error in findSource:', error);
-        document.getElementById('source').value = "Error";
+        document.getElementById('source').value = "Error: " + error.message;
         document.getElementById('source').placeholder = toTitleCase(sourceType) + " timecode";
     }
 }

@@ -49,7 +49,12 @@ def get_timecode():
             "required": ["basename", "time", "destination"]
         }), 400
 
-    return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
+    try:
+        # Normalize the time format before processing
+        time = normalize_time_format(time)
+        return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 # API to return the source type of the subtitle file
 @app.route('/source', methods=['GET'])
