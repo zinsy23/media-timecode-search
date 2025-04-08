@@ -3,6 +3,23 @@ import os
 from difflib import SequenceMatcher
 from datetime import datetime
 from sys import argv
+import boto3
+import botocore
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+# Initialize Flask backend server
+app = Flask(__name__)
+CORS(app)
+
+# Define the cloud resource
+CLOUD_RESOURCE = boto3.resource('s3',
+        endpoint_url=os.getenv("CF_URL"),
+        aws_access_key_id=os.getenv("CF_ACCESS"),
+        aws_secret_access_key=os.getenv("CF_SECRET")
+)
+
+subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles") if os.getenv("CF_ACCESS") else None
 
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
@@ -14,6 +31,56 @@ VERSION_PAIRS = [
     ("before", "after"),
     ("original", "edited")
 ]
+
+# Define whether to load media source from cloud or local
+SOURCE_TYPE = "local" 
+
+# Define the route for the timecode API
+@app.route('/timecode', methods=['GET'])
+def get_timecode():
+    basename = request.args.get('basename')
+    time = request.args.get('time')
+    destination = request.args.get('destination')
+
+    # Check if required parameters are present
+    if not all([basename, time, destination]):
+        return jsonify({
+            "error": "Missing required parameters",
+            "required": ["basename", "time", "destination"]
+        }), 400
+
+    try:
+        # Normalize the time format before processing
+        time = normalize_time_format(time)
+        return jsonify(corresponding_timecode_finder(basename, time, sourceDestination=destination))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+# API to return the source type of the subtitle file
+@app.route('/source', methods=['GET'])
+def get_source_type():
+    basename = request.args.get('basename')
+    versions = detect_subtitle_versions(basename) # Get source and destination pairs for website
+    
+    # Mechanism to detect if no valid subtitle files are found
+    if not versions:
+        return jsonify({"error": "No valid resource found"}), 404
+        
+    sourceType = versions[0] # Get source pair type
+    return jsonify(sourceType)
+
+# API to return the destination type of the subtitle file
+@app.route('/destination', methods=['GET'])
+def get_destination_type():
+    basename = request.args.get('basename')
+    versions = detect_subtitle_versions(basename) # Get source and destination pairs for website
+    
+    # Mechanism to detect if no valid subtitle files are found
+    if not versions:
+        return jsonify({"error": "No valid resource found"}), 404
+        
+    destinationType = versions[-1] # Get destination pair type
+    return jsonify(destinationType)
 
 # Get command line argument at index or return default if not provided
 def get_arg_or_default(index, default=""):
@@ -28,13 +95,23 @@ def detect_subtitle_versions(basename):
 
     # Parse out the pair names from the subtitle files if they exist
     try:
-        files = os.listdir("subtitles")
-        for file in files:
-            if file.startswith(basename):
-                # Extract the version part (everything between basename and .srt)
-                version = file[len(basename):].strip().replace(".srt", "").strip()
-                if version:  # Only add non-empty versions
-                    available_versions.add(version)
+        match SOURCE_TYPE:
+            case "local": # Detection for local subtitles
+                files = os.listdir("subtitles")
+                for file in files:
+                    if file.startswith(basename):
+                        # Extract the version part (everything between basename and .srt)
+                        version = file[len(basename):].strip().replace(".srt", "").strip()
+                        if version:  # Only add non-empty versions
+                            available_versions.add(version)
+            case "cloud": # Detection for cloud subtitles
+                for obj in subtitlesBucket.objects.all():
+                    if obj.key.startswith(basename):
+                        # Extract the version part (everything between basename and .srt)
+                        version = obj.key[len(basename):].strip().replace(".srt", "").strip()
+                        if version:  # Only add non-empty versions
+                            available_versions.add(version)
+
     except OSError:
         return []
     
@@ -77,10 +154,19 @@ def determine_source_destination(basename, specified_destination=None):
     
     return source, dest
 
+# Opens a subtitle file from the cloud bucket
+def open_subtitles(filename):
+    if SOURCE_TYPE == "cloud": # Open subtitles from cloud bucket
+        return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
+    elif SOURCE_TYPE == "local": # Open subtitles from local directory
+        return open(f"subtitles/{filename}", "r").read().split("\n")
+    else:
+        raise ValueError(f"Invalid source type: {SOURCE_TYPE}")
+
 # Loads an SRT file into a data structure friendly for the rest of the program
 def load_srt(source):
     # Read the input SRT and set up data structure friendly for all needed operations
-    sourceSrt = open(source, "r").read().split("\n")
+    sourceSrt = open_subtitles(source)
     sourceTimeTexts = []
     currentTimeText = []
     lastTimeIndex = -1
@@ -185,9 +271,12 @@ def corresponding_timecode_finder(baseName, destinationTime, sourceDestination="
         
     # Load the appropriate SRT files
     try:
-        sourceSrt = load_srt(f"subtitles/{baseName} {source_version}.srt")
-        destinationSrt = load_srt(f"subtitles/{baseName} {dest_version}.srt")
-    except FileNotFoundError as e:
+        sourceSrt = load_srt(f"{baseName} {source_version}.srt")
+        destinationSrt = load_srt(f"{baseName} {dest_version}.srt")
+    except FileNotFoundError as e: # Error handling for local subtitles
+        print(f"Error: Could not load subtitle files - {e}")
+        return None
+    except botocore.exceptions.ClientError as e: # Error handling for cloud subtitles
         print(f"Error: Could not load subtitle files - {e}")
         return None
 
@@ -229,21 +318,20 @@ def normalize_time_format(time_str):
         raise ValueError(f"Invalid time format: {time_str}. Please use HH:MM:SS, MM:SS, or SS format.")
 
 if __name__ == "__main__":
-    if len(argv) < 3:
-        print("Usage: python media_timecode.py <basename> <time> [destination_version]")
-        print("Time formats supported: HH:MM:SS, MM:SS, or SS")
-        exit(1)
-        
-    basename = argv[1]
-    try:
-        time = normalize_time_format(argv[2])
-    except ValueError as e:
-        print(f"Error: {e}")
-        exit(1)
-    destination = get_arg_or_default(3, "")
-    
-    result = corresponding_timecode_finder(basename, time, destination)
-    if result:
-        print(result)
+    if len(argv) < 2:
+        app.run(host='0.0.0.0', port=5000)  # Run the Flask server if no arguments are provided
     else:
-        print("No matching timecode found")
+        basename = argv[1]
+        try:
+            time = normalize_time_format(argv[2])
+        except ValueError as e:
+            print(f"Error: {e}")
+            exit(1)
+        destination = get_arg_or_default(3, "")
+        
+        # Run CLI with provided arguments
+        result = corresponding_timecode_finder(basename, time, destination)
+        if result:
+            print(result)
+        else:
+            print("No matching timecode found")

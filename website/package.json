@@ -1,0 +1,17 @@
+{
+  "name": "media-timecode-search",
+  "version": "1.0.0",
+  "description": "Find the corresponding timecode moment between two versions of media. (e.g. an edited video and original livestream)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Joseph Zins",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "path": "^0.12.7",
+    "node-fetch": "^2.6.9",
+    "cors": "^2.8.5"
+  }
+}
