@@ -2,10 +2,19 @@
 const express = require('express');
 const path = require('path');
 const fetch = require('node-fetch'); // Used for loading the website based on whether a valid resource exists
+const cors = require('cors');
 
 // Define express and port
 const app = express();
 const PORT = 8000;
+
+// Enable CORS for all routes
+app.use(cors());
+
+// Define API URL using service name from docker-compose
+const API_URL = process.env.API_URL || (process.env.NODE_ENV === 'production' 
+    ? 'http://media-timecode:5000'  // Docker environment
+    : 'http://localhost:5000');     // Local environment
 
 // Handle root path first
 app.get('/', (req, res) => {
@@ -40,7 +49,7 @@ app.get('*', async (req, res, next) => {
 
     try {
         // Check if the resource exists by calling the source API
-        const response = await fetch(`http://localhost:5000/source?basename=${basename}`);
+        const response = await fetch(`${API_URL}/source?basename=${basename}`);
         
         // Don't proceed if no resource exists
         if (!response.ok) {

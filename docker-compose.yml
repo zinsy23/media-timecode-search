@@ -1,0 +1,29 @@
+version: '3'
+networks:
+  media-timecode:
+services:
+  media-timecode:
+    container_name: media-timecode
+    build: .
+    image: media-timecode
+    ports:
+      - "5000:5000"
+    networks:
+      - media-timecode
+    volumes:
+      - ./subtitles:/home/python/media-timecode-search/subtitles    
+    environment:
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN}
+  media-timecode-website:
+    container_name: media-timecode-website
+    build: ./website
+    image: media-timecode-website
+    ports:
+      - "8000:8000"
+    networks:
+      - media-timecode
+    environment:
+      - API_URL=http://media-timecode:5000
+      - NODE_ENV=production
+    depends_on:
+      - media-timecode
