@@ -19,6 +19,8 @@ CLOUD_RESOURCE = boto3.resource('s3',
         aws_secret_access_key=os.getenv("CF_SECRET")
 )
 
+subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles") if os.getenv("CF_ACCESS") else None
+
 # Define common source/destination pairs and their default order
 VERSION_PAIRS = [
     ("edited", "live"),
@@ -98,7 +100,6 @@ def detect_subtitle_versions(basename):
                         if version:  # Only add non-empty versions
                             available_versions.add(version)
             case "cloud": # Detection for cloud subtitles
-                subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
                 for obj in subtitlesBucket.objects.all():
                     if obj.key.startswith(basename):
                         # Extract the version part (everything between basename and .srt)
@@ -151,7 +152,6 @@ def determine_source_destination(basename, specified_destination=None):
 # Opens a subtitle file from the cloud bucket
 def open_subtitles(filename):
     if SOURCE_TYPE == "cloud": # Open subtitles from cloud bucket
-        subtitlesBucket = CLOUD_RESOURCE.Bucket("subtitles")
         return subtitlesBucket.Object(filename).get()["Body"].read().decode("utf-8").replace("\r", "").split("\n")
     elif SOURCE_TYPE == "local": # Open subtitles from local directory
         return open(f"subtitles/{filename}", "r").read().split("\n")
